@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use crate::errors::AppError;
 use crate::jwt::generate_token;
+use crate::models::invite_code;
 use crate::models::sessions;
 use crate::models::user::{create_user, find_user_by_email, find_user_by_id, NewUser};
 use crate::state::AppState;
@@ -47,11 +48,10 @@ pub async fn register(
             email: email.clone(),
             password_hash: hash_password,
             display_name: display_name.to_string(),
-            created_at: chrono::Utc::now().to_rfc3339(),
         }
     ).await?;
 
-    let invite_code = uuid::Uuid::new_v4()
+    let invite_code_string = uuid::Uuid::new_v4()
         .to_string()
         .replace("-", "")
         .chars()
@@ -74,5 +74,15 @@ pub async fn register(
 
     // todo: générer l'invite code dans la DB
 
-    Ok((StatusCode::CREATED, Json(RegisterResponse { invite_code, token: jwt })))
+    let invite_code_db = invite_code::create_invite_code(
+        &state.db,
+        invite_code::NewInviteCode {
+            id: uuid::Uuid::new_v4().to_string(),
+            code: invite_code_string,
+            user_id: new_user.id.clone(),
+            created_at: chrono::Utc::now().to_rfc3339(),
+        }
+    ).await.map_err(|_| AppError::DatabaseError)?;
+
+    Ok((StatusCode::CREATED, Json(RegisterResponse { invite_code: invite_code_db.code, token: jwt })))
 }

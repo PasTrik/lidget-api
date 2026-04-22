@@ -16,3 +16,4 @@ dotenv = "0.15"
 tower-http = { version = "0.5", features = ["cors"] }
 bcrypt = "0.15"
 sha2 = "0.10"
+# Il faut aussi installer sqlx-cli pour run les migrations avant de build

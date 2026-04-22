@@ -18,7 +18,6 @@ pub struct NewUser {
     pub email: String,
     pub password_hash: String,
     pub display_name: String,
-    pub created_at: String,
 }
 
 pub async fn find_user_by_email(pool: &SqlitePool, email: &str) -> Result<Option<User>, AppError> {
@@ -48,13 +47,14 @@ pub async fn find_user_by_id(pool: &SqlitePool, id: &str) -> Result<Option<User>
 }
 
 pub async fn create_user(pool: &SqlitePool, user: NewUser) -> Result<User, AppError> {
+    let date = chrono::Utc::now().to_rfc3339();
     sqlx::query_as!(
         User,
         "INSERT INTO users (id, email, password_hash, display_name, created_at)
          VALUES (?, ?, ?, ?, ?)
          RETURNING id as \"id!\", email, password_hash, display_name, avatar_url,
          last_latitude, last_longitude, last_location_at, created_at",
-        user.id, user.email, user.password_hash, user.display_name, user.created_at
+        user.id, user.email, user.password_hash, user.display_name, date
     )
         .fetch_one(pool)
         .await
