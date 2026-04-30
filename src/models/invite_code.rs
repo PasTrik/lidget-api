@@ -1,4 +1,5 @@
 use crate::errors::AppError;
+use sqlx::SqlitePool;
 
 pub struct InviteCode {
     pub id: String,
@@ -13,7 +14,6 @@ pub struct NewInviteCode {
     pub id: String,
     pub code: String,
     pub user_id: String,
-    pub created_at: String,
 }
 
 pub async fn find_invite_code_by_code(pool: &sqlx::SqlitePool, code: &str) -> Result<Option<InviteCode>, AppError> {
@@ -27,13 +27,29 @@ pub async fn find_invite_code_by_code(pool: &sqlx::SqlitePool, code: &str) -> Re
 }
 
 pub async fn create_invite_code(pool: &sqlx::SqlitePool, code: NewInviteCode) -> Result<InviteCode, AppError> {
-    let date = chrono::Utc::now().to_rfc3339();
     let expires_at = (chrono::Utc::now() + chrono::Duration::days(1)).to_rfc3339();
     sqlx::query_as!(InviteCode,
-        "INSERT INTO invite_codes (id, code, user_id, expires_at, created_at)
-         VALUES (?, ?, ?, ?, ?)
+        "INSERT INTO invite_codes (id, code, user_id, expires_at)
+         VALUES (?, ?, ?, ?)
          RETURNING id as \"id!\", code, user_id, expires_at, created_at, used_at",
-        code.id, code.code, code.user_id, expires_at, date
+        code.id, code.code, code.user_id, expires_at
     )
         .fetch_one(pool).await.map_err(|_| AppError::DatabaseError)
+}
+
+pub async fn mark_invite_code_as_used(pool: &sqlx::SqlitePool, id: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        "UPDATE invite_codes SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
+        id
+    )
+        .execute(pool).await.map_err(|_| AppError::DatabaseError)?;
+    Ok(())
+}
+
+pub async fn delete_invite_code(pool: &SqlitePool, id: String) -> Result<(), AppError> {
+    sqlx::query!(
+        "DELETE FROM invite_codes WHERE id = ?",
+        id
+    ).execute(pool).await.map_err(|_| AppError::DatabaseError)?;
+    Ok(())
 }

@@ -2,7 +2,7 @@
 pub struct Config {
     pub database_url: String,
     pub jwt_secret: String,
-    pub server_port: u16
+    pub server_port: u16,
 }
 
 impl Config {

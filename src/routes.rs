@@ -1,7 +1,8 @@
-use std::sync::Arc;
-use axum::Router;
-use axum::routing::{delete, get, patch, post};
+use crate::handlers::auth;
 use crate::state::AppState;
+use axum::routing::{delete, get, patch, post};
+use axum::Router;
+use std::sync::Arc;
 
 pub fn create(state: Arc<AppState>) -> Router {
     Router::new()
@@ -14,9 +15,10 @@ pub fn create(state: Arc<AppState>) -> Router {
 
 fn auth_routes() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/register", post(placeholder))
-        .route("/join", post(placeholder))
-        .route("/@me", get(placeholder))
+        .route("/register", post(auth::register))
+        .route("/login", post(auth::login))
+        .route("/join", post(auth::join))
+        .route("/@me", get(auth::me))
 }
 
 fn photo_routes() -> Router<Arc<AppState>> {

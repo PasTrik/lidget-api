@@ -1,5 +1,6 @@
-use sqlx::SqlitePool;
 use crate::errors::AppError;
+use sha2::Digest;
+use sqlx::SqlitePool;
 
 pub struct Session {
     pub id: String,
@@ -42,20 +43,23 @@ pub async fn find_session_by_token_hash(pool: &SqlitePool, token_hash: &str) -> 
         .map_err(|_| AppError::DatabaseError)
 }
 
-pub async fn session_update_last_seen(pool: &SqlitePool, id: &str) -> Result<(), AppError> {
-    sqlx::query!(
-        "UPDATE sessions SET last_seen = CURRENT_TIMESTAMP WHERE id = ?",
-        id
-    )
-    .execute(pool).await.map_err(|_| AppError::DatabaseError)?;
-    Ok(())
-}
-
 pub async fn delete_session_by_token_hash(pool: &SqlitePool, token_hash: &str) -> Result<(), AppError> {
     sqlx::query!(
         "DELETE FROM sessions WHERE token_hash = ?",
         token_hash
     )
-    .execute(pool).await.map_err(|_| AppError::DatabaseError)?;
+        .execute(pool).await.map_err(|_| AppError::DatabaseError)?;
+    Ok(())
+}
+
+pub async fn update_session_last_seen_by_token_hash(
+    pool: &SqlitePool,
+    token_hash: &str,
+) -> Result<(), AppError> {
+    println!("token: {:}", token_hash);
+    sqlx::query!(
+        "UPDATE sessions SET last_seen = CURRENT_TIMESTAMP WHERE token_hash = ? AND last_seen < datetime('now', '-3 minutes')",
+        token_hash
+    ).execute(pool).await.map_err(|_| AppError::DatabaseError)?;
     Ok(())
 }
