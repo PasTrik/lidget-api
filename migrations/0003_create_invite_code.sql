@@ -1,8 +1,24 @@
-CREATE TABLE IF NOT EXISTS invite_codes (
-    id TEXT PRIMARY KEY,
-    code TEXT NOT NULL UNIQUE,
-    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS invite_codes
+(
+    id
+    TEXT
+    PRIMARY
+    KEY,
+    code
+    TEXT
+    NOT
+    NULL
+    UNIQUE,
+    user_id
+    TEXT
+    NOT
+    NULL
+    REFERENCES
+    users
+(
+    id
+) ON DELETE CASCADE,
     expires_at TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     used_at TEXT
-);
+    );
