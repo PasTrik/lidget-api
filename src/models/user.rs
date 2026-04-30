@@ -1,6 +1,8 @@
-use sqlx::SqlitePool;
 use crate::errors::AppError;
+use serde::{Deserialize, Serialize};
+use sqlx::SqlitePool;
 
+#[derive(Serialize)]
 pub struct User {
     pub id: String,
     pub email: String,
@@ -47,14 +49,13 @@ pub async fn find_user_by_id(pool: &SqlitePool, id: &str) -> Result<Option<User>
 }
 
 pub async fn create_user(pool: &SqlitePool, user: NewUser) -> Result<User, AppError> {
-    let date = chrono::Utc::now().to_rfc3339();
     sqlx::query_as!(
         User,
-        "INSERT INTO users (id, email, password_hash, display_name, created_at)
-         VALUES (?, ?, ?, ?, ?)
+        "INSERT INTO users (id, email, password_hash, display_name)
+         VALUES (?, ?, ?, ?)
          RETURNING id as \"id!\", email, password_hash, display_name, avatar_url,
          last_latitude, last_longitude, last_location_at, created_at",
-        user.id, user.email, user.password_hash, user.display_name, date
+        user.id, user.email, user.password_hash, user.display_name
     )
         .fetch_one(pool)
         .await
