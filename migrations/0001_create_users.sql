@@ -1,12 +1,34 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    id               TEXT PRIMARY KEY,
-    email            TEXT NOT NULL UNIQUE,
-    password_hash    TEXT NOT NULL,
-    display_name     TEXT NOT NULL,
-    avatar_url       TEXT,
-    last_longitude   REAL,
-    last_latitude    REAL,
-    last_location_at TEXT,
-    created_at       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id
+    TEXT
+    PRIMARY
+    KEY,
+    email
+    TEXT
+    NOT
+    NULL
+    UNIQUE,
+    password_hash
+    TEXT
+    NOT
+    NULL,
+    display_name
+    TEXT
+    NOT
+    NULL,
+    avatar_url
+    TEXT,
+    last_longitude
+    REAL,
+    last_latitude
+    REAL,
+    last_location_at
+    TEXT,
+    created_at
+    TEXT
+    NOT
+    NULL
+    DEFAULT
+    CURRENT_TIMESTAMP
 );

@@ -12,6 +12,9 @@ pub enum AppError {
     Forbidden,
     InternalServerError,
     Conflict(String),
+    FileTooLarge,
+    InvalidFileType,
+    FileSaveError,
 }
 
 impl IntoResponse for AppError {
@@ -24,6 +27,9 @@ impl IntoResponse for AppError {
             AppError::DatabaseError => (StatusCode::INTERNAL_SERVER_ERROR, "Database Error".to_string()),
             AppError::Forbidden => (StatusCode::FORBIDDEN, "Forbidden".to_string()),
             AppError::InternalServerError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error".to_string()),
+            AppError::FileTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "File too large".to_string()),
+            AppError::InvalidFileType => (StatusCode::UNSUPPORTED_MEDIA_TYPE, "Invalid file type".to_string()),
+            AppError::FileSaveError => (StatusCode::INTERNAL_SERVER_ERROR, "File save error".to_string()),
         };
         (status, Json(json!({ "error": message }))).into_response()
     }

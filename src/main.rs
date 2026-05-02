@@ -8,9 +8,12 @@ mod events;
 mod state;
 mod errors;
 mod jwt;
+mod pagination;
+pub mod upload;
 
-use std::sync::Arc;
 use state::AppState;
+use std::sync::Arc;
+use tower_http::services::ServeDir;
 
 #[tokio::main]
 async fn main() {
@@ -24,6 +27,9 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(
         format!("0.0.0.0:{}", state.config.server_port)
     ).await.unwrap();
+
+    let router = routes::create(state.clone())
+      .nest_service("/uploads", ServeDir::new("uploads"));
 
     let router = routes::create(state.clone());
 

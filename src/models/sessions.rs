@@ -1,5 +1,4 @@
 use crate::errors::AppError;
-use sha2::Digest;
 use sqlx::SqlitePool;
 
 pub struct Session {
@@ -56,7 +55,6 @@ pub async fn update_session_last_seen_by_token_hash(
     pool: &SqlitePool,
     token_hash: &str,
 ) -> Result<(), AppError> {
-    println!("token: {:}", token_hash);
     sqlx::query!(
         "UPDATE sessions SET last_seen = CURRENT_TIMESTAMP WHERE token_hash = ? AND last_seen < datetime('now', '-3 minutes')",
         token_hash

@@ -1,4 +1,4 @@
 pub mod auth;
+pub mod quizzes;
 mod photos;
-mod quizzes;
 mod events;

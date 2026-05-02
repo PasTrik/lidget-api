@@ -1,4 +1,5 @@
-use crate::handlers::auth;
+use crate::handlers::{auth, quizzes};
+use crate::handlers::quizzes::{find_quiz_by_id, find_quiz_history};
 use crate::state::AppState;
 use axum::routing::{delete, get, patch, post};
 use axum::Router;
@@ -28,10 +29,24 @@ fn photo_routes() -> Router<Arc<AppState>> {
 }
 
 fn quiz_routes() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/", get(placeholder))
-        .route("/history", get(placeholder))
-        .route("/:id/answer", post(placeholder))
+  Router::new()
+    .route("/", get(quizzes::find_all_quizzes))
+    .route("/", post(quizzes::create_quiz))
+    .route("/available", get(quizzes::find_available_quizzes))
+    .route("/history", get(quizzes::find_quiz_history))
+    .route("/categories", get(quizzes::find_all_quizzes_categories))
+    .route("/categories", post(quizzes::create_quiz_category))
+    .route("/categories/:id", patch(quizzes::edit_quiz_category))
+    .route("/categories/:id", delete(quizzes::delete_quiz_category))
+    .route("/:id", get(quizzes::find_quiz_by_id))
+    .route("/:id", patch(quizzes::edit_quiz))
+    .route("/:id", delete(quizzes::delete_quiz))
+    .route("/:id/questions", post(quizzes::create_quiz_question))
+    .route("/:id/questions/:question_id", patch(quizzes::edit_quiz_question))
+    .route("/:id/questions/:question_id", delete(quizzes::delete_quiz_question))
+    .route("/:id/questions/:question_id/choices/text", post(quizzes::create_quiz_text_choice))
+    .route("/:id/questions/:question_id/choices/image", post(quizzes::create_quiz_image_choice))
+    .route("/:id/answer", post(quizzes::answer_quiz))
 }
 
 fn event_routes() -> Router<Arc<AppState>> {
