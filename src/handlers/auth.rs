@@ -1,8 +1,8 @@
 use crate::errors::AppError;
 use crate::jwt::generate_token;
 use crate::middleware::auth::{AuthUser, GuestUser};
-use crate::models::sessions;
-use crate::models::sessions::Session;
+use crate::models::session;
+use crate::models::session::Session;
 use crate::models::user::{create_user, find_user_by_email, NewUser, User};
 use crate::models::{invite_code, relationship};
 use crate::state::AppState;
@@ -48,9 +48,9 @@ pub struct LoginResponse {
 async fn create_session(state: &Arc<AppState>, token: &str, user: &User) -> Result<Session, AppError> {
     let token_hash = format!("{:x}", Sha256::digest(token.as_bytes()));
 
-    sessions::create_session(
+    session::create_session(
         &state.db,
-        sessions::NewSession {
+        session::NewSession {
             id: uuid::Uuid::new_v4().to_string(),
             user_id: user.id.clone(),
             device_name: "Unknown".to_string(),
@@ -97,9 +97,7 @@ pub async fn register(
     let jwt = generate_token(&new_user.id, &state.config.jwt_secret)?;
 
     create_session(&state, &jwt, &new_user).await.map_err(|_| AppError::DatabaseError)?;
-
-    // todo: générer l'invite code dans la DB
-
+  
     let invite_code_db = invite_code::create_invite_code(
         &state.db,
         invite_code::NewInviteCode {

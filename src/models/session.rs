@@ -51,13 +51,13 @@ pub async fn delete_session_by_token_hash(pool: &SqlitePool, token_hash: &str) -
     Ok(())
 }
 
-pub async fn update_session_last_seen_by_token_hash(
+pub async fn update_session_last_seen_by_id(
     pool: &SqlitePool,
-    token_hash: &str,
+    id: &str,
 ) -> Result<(), AppError> {
     sqlx::query!(
-        "UPDATE sessions SET last_seen = CURRENT_TIMESTAMP WHERE token_hash = ? AND last_seen < datetime('now', '-3 minutes')",
-        token_hash
+        "UPDATE sessions SET last_seen = CURRENT_TIMESTAMP WHERE id = ?",
+        id
     ).execute(pool).await.map_err(|_| AppError::DatabaseError)?;
     Ok(())
 }

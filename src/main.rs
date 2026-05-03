@@ -10,20 +10,23 @@ mod errors;
 mod jwt;
 mod pagination;
 pub mod upload;
+pub mod ws;
 
+use std::collections::HashMap;
 use state::AppState;
 use std::sync::Arc;
+use tokio::sync::RwLock;
 use tower_http::services::ServeDir;
+use crate::ws::registry::Registry;
 
 #[tokio::main]
 async fn main() {
-    // 1. Config
     let config = config::Config::from_env();
-    // 2. DB
     let pool = db::connect(&config.database_url).await;
-    // 3. AppState
-    let state = Arc::new(AppState::new(pool, config));
-    // 4. Router
+    let ws = Arc::new(RwLock::new(HashMap::new()));
+
+    let state = Arc::new(AppState::new(pool, config, ws));
+
     let listener = tokio::net::TcpListener::bind(
         format!("0.0.0.0:{}", state.config.server_port)
     ).await.unwrap();
@@ -34,6 +37,4 @@ async fn main() {
     let router = routes::create(state.clone());
 
     axum::serve(listener, router).await.expect("Failed to start server");
-
-    // 5. Lancer le serveur
 }

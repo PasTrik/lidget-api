@@ -4,6 +4,7 @@ use crate::state::AppState;
 use axum::routing::{delete, get, patch, post};
 use axum::Router;
 use std::sync::Arc;
+use crate::ws;
 
 pub fn create(state: Arc<AppState>) -> Router {
     Router::new()
@@ -11,6 +12,7 @@ pub fn create(state: Arc<AppState>) -> Router {
         .nest("/api/photos", photo_routes())
         .nest("/api/quizzes", quiz_routes())
         .nest("/api/events", event_routes())
+        .route("/ws", get(ws::handler::handle))
         .with_state(state)
 }
 
